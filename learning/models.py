@@ -33,4 +33,4 @@ class Question(models.Model):
     question = models.CharField(max_length=3000)
     answer = models.CharField(max_length=3000)
     options = models.CharField(max_length=3000)
-    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE,related_name='question')

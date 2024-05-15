@@ -82,6 +82,7 @@ class CourseRetrieveAPIView(ListAPIView):
         except Exception as e:
             return Response({"error": str(e), 'message': 'No search results found.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
+
 class ChapterInfoAPIView(APIView):
     def post(self, request, *args, **kwargs):
         chapter_id = request.data.get('chapterId')
@@ -94,40 +95,50 @@ class ChapterInfoAPIView(APIView):
             return Response({"success": False, "error": "Chapter not found"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            print("chapter title",chapter.youtubeSearchQuery)
+            print("chapter title", chapter.youtubeSearchQuery)
             video_id = search_youtube(chapter.youtubeSearchQuery)
-            print("video id",video_id)
+            print("video id", video_id)
             if not video_id:
                 return Response({"success": False, "error": "Video not found"}, status=status.HTTP_404_NOT_FOUND)
+            
             transcript = get_transcript(video_id)
-            print("transcript_view:",transcript)
+            print("transcript_view:", transcript)
+            
             if not transcript:
-                return Response({"success": False, "error": "Transcript not found"}, status=status.HTTP_404_NOT_FOUND)
+                chapter.videoId = video_id
+                chapter.save()
+                
+                return Response({"success": True, "videoId": video_id, "error": "Transcript not found"}, status=status.HTTP_200_OK)
+            
             summary = model.generate_content(
-               "You are an AI capable of summarising a youtube transcript. Summarise in 250 words or less and do not talk of the sponsors or anything unrelated to the main topic. Also, do not introduce what the summary is about.\n" + transcript
-
+                "You are an AI capable of summarising a youtube transcript. Summarise in 250 words or less and do not talk of the sponsors or anything unrelated to the main topic. Also, do not introduce what the summary is about.\n" + transcript
             )
             summary_text = summary._result.candidates[0].content.parts[0].text
-            print("summary_text",summary_text)
-            questions = get_questions_from_transcript(transcript, chapter.name)
+            print("summary_text", summary_text)
             
-            print("question view file",questions)
-            for question in questions['parts']:
-                question_dict = ast.literal_eval(question['text'])
-                options = [question_dict['answer'], question_dict['option1'], question_dict['option2'], question_dict['option3']]
-                options.sort(key=lambda _: random.random())
-                chapter_instance = get_object_or_404(Chapter, id=chapter_id)
-                Question.objects.create(
-                    question=question_dict['question'],
-                    answer=question_dict['answer'],
-                    options=options,
-                    chapter=chapter_instance
-                )
+            questions = get_questions_from_transcript(transcript, chapter.name)
+            print("question view file", questions)
+            
+            if 'parts' in questions:
+                for question in questions['parts']:
+                    if 'text' in question:
+                        question_dict = ast.literal_eval(question['text'])
+                        options = [question_dict['answer'], question_dict['option1'], question_dict['option2'], question_dict['option3']]
+                        options.sort(key=lambda _: random.random())
+                        chapter_instance = get_object_or_404(Chapter, id=chapter_id)
+                        Question.objects.create(
+                            question=question_dict['question'],
+                            answer=question_dict['answer'],
+                            options=options,
+                            chapter=chapter_instance
+                        )
+            
             chapter.videoId = video_id
             chapter.summary = summary_text
             chapter.save()
 
-            return Response({"success": True, "videoId": video_id, "transcript": transcript,"summary":summary_text}, status=status.HTTP_200_OK)
+            return Response({"success": True, "videoId": video_id, "transcript": transcript, "summary": summary_text}, status=status.HTTP_200_OK)
+        
         except Exception as e:
-         traceback.print_exc()
-         return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            traceback.print_exc()
+            return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -4,7 +4,7 @@ from .models import Unit, Chapter, Course
 from .unsplash import get_unsplash_image
 from django.contrib.auth import get_user_model
 
-genai.configure(api_key="AIzaSyAsL2Yc9-CuieL6_UODf5LOjpXwyKqQbew")
+genai.configure(api_key="AIzaSyD_BCQn7CjSfDqqwe-KUQeE5JWgXf0xTpM")
 model = genai.GenerativeModel('gemini-pro')
 
 def get_keywords_from_content(content):
@@ -33,7 +33,7 @@ def generate_chapters(title, units, user):
 
     for unit_index, unit_name in enumerate(units, start=1):
         unit, created = Unit.objects.get_or_create(name=unit_name, course=course)
-        response = model.generate_content(f"top topic Create chapters for the unit top {unit_name}  of the course {title}.")
+        response = model.generate_content(f"You are an AI capable of curating course content, coming up with relevant chapter titles, and finding relevant YouTube videos for each chapter.Create chapters for the unit {unit_name} of the course {title}, and provide detailed YouTube search queries for informative educational videos for each chapter.`")
         if hasattr(response, 'text'):
             chapters = []
             chapter_counter = 1
