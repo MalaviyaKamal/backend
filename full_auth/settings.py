@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "djoser",
     "users",
-    "learning"
+    "learning",
+    "subscription"
     
 ]
 
@@ -212,3 +213,8 @@ AUTH_USER_MODEL = "users.UserAccount"
 # DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
+
+
+STRIPE_SECRET_KEY = "sk_test_51PJWsUK6Nf7VVBOPfhAwZBxtfeTlOQ2rOewSinp2GXUKEjOuN61o0g7fOMgROh7cQ0ZHAO1CK1asHtXSGOIKBAwD00fFMp05JL"
+STRIPE_PUBLIC_KEY = "pk_test_51PJWsUK6Nf7VVBOPXkdbsng6EeI1HwlRxjqD23rrYs3uUFBBlJk5gKotv4X7wTMMTGKEHcm8Gc3fenykh4bJhlIM00DqB9Tln9"
+NEXTAUTH_URL = "http://localhost:3000"

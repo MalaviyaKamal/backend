@@ -6,5 +6,5 @@ urlpatterns = [
     path('api/', include('djoser.urls')),
     path('api/', include('users.urls')),
     path('api/course/', include('learning.urls')),
-    
+    path('api/stripe/',include('subscription.urls'))
 ]
