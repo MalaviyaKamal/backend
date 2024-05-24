@@ -25,39 +25,8 @@ def get_transcript(video_id):
         return transcript.replace("\n", "")
     except Exception as e:
         print(f"Error when getting transcript: {e}")
-        # Handle the error by returning an empty string or using a cached transcript (if available)
-        return ""  # or provide a default transcript if you have one
+        return ""  
 
-
-# def get_questions_from_transcript(transcript, course_title):
-#     questions = []
-#     for _ in range(5):
-#         prompt = f"You are a helpful AI that is able to generate multiple-choice questions and answers. Example question format: {{'question': 'What is 2+2?', 'answer': '4', 'option1': '3', 'option2': '5', 'option3': '6'}}. The length of each answer should not be more than 15 words. You are to generate a random hard multiple-choice question about {course_title} with context from the following transcript: {transcript}"
-#         response = model.generate_content(prompt)
-#         mcq = response._result.candidates[0].content.parts[0].text
-#         questions.append({'text': mcq})
-#     print("questions:", questions)
-#     return {'parts': questions}
-# def get_questions_from_transcript(transcript, course_title, num_questions=1):
-#     num_questions = max(1, min(num_questions, 5))
-#     questions = []
-
-#     for _ in range(num_questions):
-#         if transcript.strip():
-#             prompt = (f"You are a helpful AI that is able to generate multiple-choice questions and answers. "
-#                       f"Example question format: {{'question': 'What is 2+2?', 'answer': '4', 'option1': '3', 'option2': '5', 'option3': '6'}}. "
-#                       f"The length of each answer should not be more than 15 words. You are to generate a random hard multiple-choice question "
-#                       f"about {course_title} with context from the following transcript: {transcript}")
-
-#             response = model.generate_content(prompt)
-#             mcq = response._result.candidates[0].content.parts[0].text
-#         else:
-#             mcq = f"I am sorry, but there is no contextual information provided for me to generate a multiple-choice question about Chapter 10: \"{course_title}\"."
-
-#         questions.append({'text': mcq})
-
-#     print("questions:", questions)
-#     return {'parts': questions}
 def get_questions_from_transcript(transcript, course_title, num_questions=3):
     num_questions = max(3, min(num_questions, 5))
     questions = []
@@ -84,38 +53,3 @@ def get_questions_from_transcript(transcript, course_title, num_questions=3):
 
     print("questions:", questions)
     return {'parts': questions}
-
-# def get_questions_from_transcript(transcript, course_title, num_questions=1):
-#     # Ensure the number of questions is between 1 and 5
-#     num_questions = max(1, min(num_questions, 5))
-#     questions = []
-
-#     for _ in range(num_questions):
-#         if transcript.strip():
-#             prompt = (f"You are a helpful AI that is able to generate multiple-choice questions and answers. "
-#                       f"Example question format: {{'question': 'What is 2+2?', 'answer': '4', 'option1': '3', 'option2': '5', 'option3': '6'}}. "
-#                       f"The length of each answer should not be more than 15 words. You are to generate a random hard multiple-choice question "
-#                       f"about {course_title} with context from the following transcript: {transcript}")
-
-#             response = model.generate_content(prompt)
-#             mcq = response._result.candidates[0].content.parts[0].text
-#         else:
-#             mcq = ""
-
-#         if not mcq.strip():
-#             prompt = (f"You are a helpful AI that is able to generate multiple-choice questions and answers. "
-#                       f"Example question format: {{'question': 'What is 2+2?', 'answer': '4', 'option1': '3', 'option2': '5', 'option3': '6'}}. "
-#                       f"The length of each answer should not be more than 15 words. You are to generate a random hard multiple-choice question "
-#                       f"about {course_title}.")
-#             response = model.generate_content(prompt)
-#             mcq = response._result.candidates[0].content.parts[0].text
-
-#         if transcript.strip():
-#             questions.append({'text': mcq})
-#         else:
-#             questions.append({'video_id': video_id, 'summary_text': summary_text})
-
-#     print("questions:", questions)
-#     return {'parts': questions}
-
-

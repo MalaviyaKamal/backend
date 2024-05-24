@@ -81,6 +81,32 @@ def generate_chapters(title, units, user):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # import google.generativeai as genai
 # from .models import Unit, Chapter, Course
 # from .unsplash import get_unsplash_image

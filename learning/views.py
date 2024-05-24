@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 import google.generativeai as genai
 from .models import Course, Unit, Chapter,Question
+from subscription.models import UserSubscription
 from .gpt import generate_chapters,model
 from django.shortcuts import get_object_or_404
 from .serializers import CourseSerializer,ChapterSerializer
@@ -16,6 +17,9 @@ import traceback
 import json
 import random
 import ast
+from django.utils import timezone
+from datetime import timedelta
+
 class CreateChapterAPIView(APIView):
     def post(self, request):
         title = request.data.get('title')
@@ -26,16 +30,37 @@ class CreateChapterAPIView(APIView):
             return Response({"error": "Title and units are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Check user's subscription status
+            user = request.user
+            user_subscription = UserSubscription.objects.filter(user=user).first()
+            has_active_subscription = False
+
+            if user_subscription:
+                DAY_IN_MS = timedelta(days=1)
+                current_time = timezone.now()
+                has_active_subscription = (
+                    user_subscription.stripe_price_id and
+                    user_subscription.stripe_current_period_end and
+                    (user_subscription.stripe_current_period_end + DAY_IN_MS) > current_time
+                )
+
+            if not has_active_subscription and user.credits <= 0:
+                return Response({"error": "No credits remaining"}, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+            # Generate chapters
             response_data = generate_chapters(title, units, user_id)
+
+            # Decrement user's credits if no active subscription
+            if not has_active_subscription:
+                user.credits -= 1
+                user.save()
+
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
 class CourseListAPIView(ListAPIView):
-    # queryset = Course.objects.all()
     serializer_class = CourseSerializer
     
     # def get_queryset(self):
