@@ -30,7 +30,7 @@ class StripeSubscriptionView(APIView):
 
             user_subscription = UserSubscription.objects.filter(user=user).first()
 
-            settings_url = settings.NEXTAUTH_URL + "/settings"
+            settings_url = settings.NEXTAUTH_URL + "/dashboard"
 
             if user_subscription and user_subscription.stripe_customer_id:
                 stripe_session = stripe.billing_portal.Session.create(
