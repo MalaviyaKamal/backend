@@ -46,9 +46,9 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     credits = models.IntegerField(default=10)
-    image = models.CharField(max_length=255, default="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg")
     # image = models.CharField(max_length=255, default=False)
-    
+    image = models.ImageField(upload_to='user_images/', default="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg")  # Change to ImageField
+
     objects = UserAccountManager()
 
     USERNAME_FIELD = 'email'

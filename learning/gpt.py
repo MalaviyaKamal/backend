@@ -18,11 +18,18 @@ def generate_chapters(title, units, user):
         return {"error": f"User with id '{user}' does not exist."}
 
     try:
-        course_content = model.generate_content(f"A learning course about {title}")
-        keywords = get_keywords_from_content(course_content.text)
-        image_search_term = ' '.join(keywords)
-        print("image search", image_search_term)
-        course_image = get_unsplash_image(image_search_term)
+        # course_content = model.generate_content(f"A learning course about {title}")
+        # keywords = get_keywords_from_content(course_content.text)
+        # image_search_term = ' '.join(keywords)
+        # print("image search", image_search_term)
+        # course_image = get_unsplash_image(image_search_term)
+        # course = Course.objects.create(name=title, image=course_image, user=user_instance)
+        # course_id = course.id
+        course_image = get_unsplash_image(title)
+        if not course_image:
+            return {"error": "No image found for the given title."}
+
+        # Create the course with the image and user
         course = Course.objects.create(name=title, image=course_image, user=user_instance)
         course_id = course.id
     except Exception as e:

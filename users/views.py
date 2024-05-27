@@ -9,9 +9,10 @@ from rest_framework_simplejwt.views import (
     
 )
 from datetime import datetime,timedelta
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from .serializers import UserAccountSerializer
-
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from .models import UserAccount
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -110,4 +111,30 @@ class LogoutView(APIView):
         )
         return response
     
-    
+
+
+class UserProfile(RetrieveUpdateDestroyAPIView):
+    queryset = UserAccount.objects.all()
+    serializer_class = UserAccountSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_object(self):
+        # Return the currently authenticated user
+        return self.request.user
+
+    def retrieve(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+        else:
+            return Response("Not authenticated", status=status.HTTP_401_UNAUTHORIZED)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        return super().perform_update(serializer)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_deleted = True
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

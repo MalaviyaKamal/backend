@@ -4,7 +4,7 @@ from .views import (
     CustomTokenRefreshView,
     CustomTokenVerifyView,
     CurrentUserView,
-    LogoutView,
+    LogoutView,UserProfile
 )
 
 urlpatterns = [
@@ -13,4 +13,6 @@ urlpatterns = [
     path("jwt/verify/", CustomTokenVerifyView.as_view()),
     path('current-user/', CurrentUserView.as_view(), name='current-user'),
     path("logout/", LogoutView.as_view()),
+    path('user-profile/', UserProfile.as_view(), name='user-profile'),
+
 ]

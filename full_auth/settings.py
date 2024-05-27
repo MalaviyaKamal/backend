@@ -97,14 +97,7 @@ if DEVELOPMENT_MODE is True:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-# elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
-#     if getenv("DATABASE_URL", None) is None:
-#         raise Exception("DATABASE_URL environment variable not defined")
-#     DATABASES = {
-#         "default": dj_database_url.parse(getenv("DATABASE_URL")),
-#     }
 
-# Email settings
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
@@ -151,11 +144,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-if DEVELOPMENT_MODE is True:
-    STATIC_URL = "static/"
-    STATIC_ROOT = BASE_DIR / "static"
-    MEDIA_URL = "media/"
-    MEDIA_ROOT = BASE_DIR / "media"
+
+STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_URL = '/media/'
+
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
