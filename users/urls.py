@@ -3,7 +3,6 @@ from .views import (
     CustomTokenObtainPairView,
     CustomTokenRefreshView,
     CustomTokenVerifyView,
-    CurrentUserView,
     LogoutView,UserProfile
 )
 
@@ -11,7 +10,6 @@ urlpatterns = [
     path("jwt/create/", CustomTokenObtainPairView.as_view()),
     path("jwt/refresh/", CustomTokenRefreshView.as_view()),
     path("jwt/verify/", CustomTokenVerifyView.as_view()),
-    path('current-user/', CurrentUserView.as_view(), name='current-user'),
     path("logout/", LogoutView.as_view()),
     path('user-profile/', UserProfile.as_view(), name='user-profile'),
 

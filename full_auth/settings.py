@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     "djoser",
     "users",
     "learning",
-    "subscription"
+    "subscription",
+    "chatpdf"
     
 ]
 

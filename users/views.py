@@ -78,12 +78,7 @@ class CustomTokenVerifyView(TokenVerifyView):
 
         return super().post(request, *args, **kwargs)
 
-class CurrentUserView(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        serializer = UserAccountSerializer(request.user)
-        return Response(serializer.data)
 
 class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
@@ -112,7 +107,6 @@ class LogoutView(APIView):
         return response
     
 
-
 class UserProfile(RetrieveUpdateDestroyAPIView):
     queryset = UserAccount.objects.all()
     serializer_class = UserAccountSerializer
@@ -133,8 +127,31 @@ class UserProfile(RetrieveUpdateDestroyAPIView):
         serializer.save()
         return super().perform_update(serializer)
 
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request):
+      try:
+            user = request.user
+            user.delete() 
+            response = Response({"message": "Account deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            past_date = datetime.utcnow() - timedelta(days=10)
+            response.set_cookie(
+                "access",
+                "",
+                max_age=0,
+                path=settings.AUTH_COOKIE_PATH,
+                secure=settings.AUTH_COOKIE_SECURE,
+                httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+            )
+            response.set_cookie(
+                "refresh",
+                "",
+                max_age=0,
+                path=settings.AUTH_COOKIE_PATH,
+                secure=settings.AUTH_COOKIE_SECURE,
+                httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+            )
+            return response
+          
+      except Exception as e:
+          return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

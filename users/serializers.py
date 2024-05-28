@@ -9,7 +9,6 @@ class UserAccountSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         validated_data.pop('email', None)
-        validated_data.pop('email', None)
         validated_data.pop('is_active', None)
         validated_data.pop('is_staff', None)
         validated_data.pop('is_superuser', None)
