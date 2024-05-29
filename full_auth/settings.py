@@ -104,12 +104,12 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER ='malaviyakamal32@gmail.com'
-EMAIL_HOST_PASSWORD = 'qcty fbkb usvg nsci'
+EMAIL_HOST_USER =getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = getenv('EMAIL_HOST_PASSWORD')
 
 
-DOMAIN = "localhost:3000"
-SITE_NAME = "Full Auth"
+DOMAIN = getenv('DOMAIN')
+SITE_NAME = "learning journey website send you."
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -173,9 +173,8 @@ DJOSER = {
     "USER_CREATE_PASSWORD_RETYPE": True,
     "PASSWORD_RESET_CONFIRM_RETYPE": True,
     "TOKEN_MODEL": None,
-    # "SERIALIZERS":{
-    #     "'current_user': 'users.serializers.GetUserSerializer',"
-    # }
+    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': getenv('REDIRECT_URLS').split(',')
+
 }
 
 AUTH_COOKIE = "access"
@@ -184,6 +183,15 @@ AUTH_COOKIE_SECURE = True
 AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_PATH = "/"
 AUTH_COOKIE_SAMESITE = "None"
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = getenv('GOOGLE_AUTH_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = getenv('GOOGLE_AUTH_SECRET_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'openid'
+]
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ['first_name', 'last_name']
 
 
 CORS_ALLOWED_ORIGINS = getenv(
@@ -201,8 +209,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
 
-STRIPE_SECRET_KEY = "sk_test_51PJWsUK6Nf7VVBOPfhAwZBxtfeTlOQ2rOewSinp2GXUKEjOuN61o0g7fOMgROh7cQ0ZHAO1CK1asHtXSGOIKBAwD00fFMp05JL"
-STRIPE_PUBLIC_KEY = "pk_test_51PJWsUK6Nf7VVBOPXkdbsng6EeI1HwlRxjqD23rrYs3uUFBBlJk5gKotv4X7wTMMTGKEHcm8Gc3fenykh4bJhlIM00DqB9Tln9"
-NEXTAUTH_URL = "http://localhost:3000"
-STRIPE_WEBHOOK_SECRET = 'whsec_db9efb138001795a6145be96b16909eada91b5b29663ac1abc19d71988143f59'
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+
+
+# settings.py
+import os
+
+AWS_ACCESS_KEY_ID = getenv('S3_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = getenv('S3_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = getenv('S3_BUCKET_NAME')
+AWS_S3_REGION_NAME = getenv('S3_REGION_NAME')

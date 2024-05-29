@@ -4,14 +4,16 @@ from rest_framework import status
 import stripe
 import json
 from .models import UserSubscription
-from django.conf import settings
+from os import getenv
+
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseBadRequest
 from rest_framework.permissions import AllowAny
 from datetime import datetime,timedelta
 from django.utils import timezone
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = getenv('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET=getenv('STRIPE_WEBHOOK_SECRET')
 
 User = get_user_model()
 
@@ -30,18 +32,18 @@ class StripeSubscriptionView(APIView):
 
             user_subscription = UserSubscription.objects.filter(user=user).first()
 
-            settings_url = settings.NEXTAUTH_URL + "/dashboard"
+            url = getenv('NEXTAUTH_URL')+ "/dashboard"
 
             if user_subscription and user_subscription.stripe_customer_id:
                 stripe_session = stripe.billing_portal.Session.create(
                     customer=user_subscription.stripe_customer_id,
-                    return_url=settings_url
+                    return_url=url
                 )
                 return Response({"url": stripe_session.url})
 
             stripe_session = stripe.checkout.Session.create(
-                success_url=settings_url,
-                cancel_url=settings_url,
+                success_url=url,
+                cancel_url=url,
                 payment_method_types=["card"],
                 mode="subscription",
                 billing_address_collection="auto",
@@ -82,7 +84,7 @@ class StripeWebhookView(APIView):
 
         try:
             event = stripe.Webhook.construct_event(
-                payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+                payload, sig_header, STRIPE_WEBHOOK_SECRET
             )
         except ValueError as e:
             print(f"Invalid payload: {e}")

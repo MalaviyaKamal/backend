@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import UserAccount 
 from django.conf import settings
-# Create your models here.
+
 class Chats(models.Model):
     id = models.AutoField(primary_key=True)
     pdf_name = models.CharField(max_length=255)

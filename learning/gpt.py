@@ -3,6 +3,7 @@ from .models import Unit, Chapter, Course
 from .unsplash import get_unsplash_image
 from django.contrib.auth import get_user_model
 
+# geminai_api_key = getenv("")
 genai.configure(api_key="AIzaSyD_BCQn7CjSfDqqwe-KUQeE5JWgXf0xTpM")
 model = genai.GenerativeModel('gemini-pro')
 
