@@ -4,16 +4,15 @@ from rest_framework import status
 import stripe
 import json
 from .models import UserSubscription
-from os import getenv
-
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseBadRequest
 from rest_framework.permissions import AllowAny
 from datetime import datetime,timedelta
 from django.utils import timezone
 
-stripe.api_key = getenv('STRIPE_SECRET_KEY')
-STRIPE_WEBHOOK_SECRET=getenv('STRIPE_WEBHOOK_SECRET')
+stripe.api_key = settings.STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET=settings.STRIPE_WEBHOOK_SECRET
 
 User = get_user_model()
 
@@ -32,7 +31,7 @@ class StripeSubscriptionView(APIView):
 
             user_subscription = UserSubscription.objects.filter(user=user).first()
 
-            url = getenv('NEXTAUTH_URL')+ "/dashboard"
+            url = settings.NEXTAUTH_URL+ "/dashboard"
 
             if user_subscription and user_subscription.stripe_customer_id:
                 stripe_session = stripe.billing_portal.Session.create(

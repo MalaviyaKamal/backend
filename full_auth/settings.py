@@ -208,13 +208,19 @@ AUTH_USER_MODEL = "users.UserAccount"
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
+GEMINAI_API_KEY=getenv("GEMINAI_API_KEY")
+unsplash_api_key = getenv("unsplash_api_key")
+YOUTUBE_API_KEY=getenv("YOUTUBE_API_KEY")
+
+#stripe api
+STRIPE_SECRET_KEY = getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = getenv("STRIPE_PUBLIC_KEY")
+NEXTAUTH_URL = getenv("NEXTAUTH_URL")
+STRIPE_WEBHOOK_SECRET = getenv("STRIPE_WEBHOOK_SECRET")
+
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-
-
-# settings.py
-import os
 
 AWS_ACCESS_KEY_ID = getenv('S3_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = getenv('S3_SECRET_ACCESS_KEY')

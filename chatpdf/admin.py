@@ -3,7 +3,7 @@ from .models import Chats,Messages
 # Register your models here.
 @admin.register(Chats)
 class ChatsAdmin(admin.ModelAdmin):
-    list_display = ('id','pdf_name','pdf_url','created_at','user','file_key')
+    list_display = ('id','pdf_name','pdf_url','file_key','created_at','user')
     
 
 @admin.register(Messages)
