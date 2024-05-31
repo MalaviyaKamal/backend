@@ -36,3 +36,6 @@ def get_embeddings(text):
     except requests.RequestException as e:
         print(f"Error calling GeminAI embeddings API: {e}")
         raise
+
+
+

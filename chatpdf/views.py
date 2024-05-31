@@ -1,22 +1,26 @@
 import time
 import boto3
+import logging
+import os
+import hashlib
+import re
+from .models import Chats
+from pinecone import Pinecone
+from django.conf import settings
+from rest_framework import status
+from .utils import convert_to_ascii
+from .embeddings import get_embeddings
+from .serializers import ChatSerializer
+from .s3_server import download_from_s3
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from django.conf import settings
-from .models import Chats
-from .serializers import ChatSerializer
-import os
-import hashlib
-from pinecone import Pinecone
-from .s3_server import download_from_s3
-from .embeddings import get_embeddings
 from langchain_community.document_loaders import PyPDFLoader
-from .utils import convert_to_ascii
-from langchain.docstore.document import Document
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import Pinecone
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 class UploadToS3(APIView):
     parser_classes = [MultiPartParser]
     permission_classes = [IsAuthenticated]
@@ -42,93 +46,106 @@ class UploadToS3(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
+
 def get_pinecone_client():
     return Pinecone(
-        environment="us-west1-gcp",
+        environment="us-east-1-aws",
         api_key="4a574746-607d-41cd-8a8e-51f9483cf45c"
     )
+
 class CreateChat(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        if not request.user.is_authenticated:
-            return Response({'error': 'unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-        
         serializer = ChatSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            # Call load_s3_into_pinecone after saving chat information
             try:
-        # 1. Obtain the PDF -> Download and read from PDF
-        print("Downloading from S3 into file system")
-        file_name = await download_from_s3(file_key)
-        if not file_name:
-            raise Exception("Could not download from S3")
+                file_key = request.data.get('file_key')
+                file_name = download_from_s3(file_key)
+                if not file_name:
+                    raise Exception("Could not download from S3")
 
-        print("Loading PDF into memory:", file_name)
-        loader = PDFLoader(file_name)
-        pages = await loader.load()
+                loader = PyPDFLoader(file_name)
+                pages = loader.load()
 
-        # 2. Split and segment the PDF
-        documents = await prepare_documents(pages)
+                documents = prepare_documents(pages)
 
-        # 3. Vectorize and embed individual documents
-        vectors = []
-        for doc in documents:
-            vectors.extend(await embed_document(doc))
+                vectors = []
+                for doc in documents:
+                    vectors.extend(embed_document(doc))
 
-        # 4. Upload to Pinecone
-        client = get_pinecone_client()
-        pinecone_index = await client.index("chat-pdf")
-        namespace = pinecone_index.namespace(convert_to_ascii(file_key))
+                client = get_pinecone_client()
+                pinecone_index = client.index("chat-pdf")
+                namespace = pinecone_index.namespace(convert_to_ascii(file_key))
 
-        print("Inserting vectors into Pinecone")
-        await namespace.upsert(vectors)
+                namespace.upsert(vectors)
 
-        return documents[0]
-    except Exception as e:
-        print("Error:", e)
-        raise
+                return Response({'chat_id': serializer.data['id'], "message": "Chat created successfully"}, status=status.HTTP_200_OK)
+            except Exception as e:
+                logger.error("Error creating chat: %s", str(e))
+                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            logger.error("Invalid serializer data: %s", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-async def embed_document(doc):
+def embed_document(doc):
     try:
-        embeddings = await get_embeddings(doc.page_content)
-        hash_val = hashlib.md5(doc.page_content.encode()).hexdigest()
+        # Initialize the embeddings model
+        embeddings_model = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+        prine("kmalamamk")
+        # Generate embeddings for the document content
+        embeddings = embeddings_model.embed_documents(doc['page_content'])
+        
+        print("embeddings",embeddings)
+        # Create a hash for the document ID
+        hash_val = hashlib.md5(doc['page_content'].encode()).hexdigest()
 
-        return PineconeRecord(
-            id=hash_val,
-            values=embeddings,
-            metadata={
-                'text': doc.metadata['text'],
-                'pageNumber': doc.metadata['pageNumber']
+        return [{
+            'id': hash_val,
+            'values': embeddings,
+            'metadata': {
+                'text': doc['metadata']['text'],
+                'pageNumber': doc['metadata']['pageNumber']
             }
-        )
+        }]
     except Exception as e:
-        print("Error embedding document:", e)
+        logger.error("Error embedding document: %s", str(e))
         raise
 
-async def prepare_documents(pages):
+def prepare_documents(pages):
     documents = []
-    for page in pages:
-        page_content = page['pageContent'].replace("\n", "")
-        metadata = {
-            'pageNumber': page['metadata']['loc']['pageNumber'],
-            'text': truncate_string_by_bytes(page_content, 36000)
-        }
-        # Split the docs
-        splitter = RecursiveCharacterTextSplitter()
-        docs = await splitter.split_documents([
-            Document(page_content=page_content, metadata=metadata)
-        ])
-        documents.extend(docs)
+    logger.debug("Preparing documents from pages")
+    try:
+        for page in pages:
+            page_content = clean_text(page.page_content)  # Access page content directly
+            metadata = {
+                'pageNumber': page.metadata.get('page', 'N/A'),  # Safely access metadata
+                'text': truncate_string_by_bytes(page_content, 36000)
+            }
+            documents.append({
+                'page_content': page_content,
+                'metadata': metadata
+            })
+        logger.debug("Documents prepared: %s", documents)
+    except Exception as e:
+        logger.error("Error preparing documents: %s", str(e))
+        raise
     return documents
+
+def clean_text(text):
+    return re.sub(r'\s+', ' ', text).strip()
 
 def truncate_string_by_bytes(s, bytes):
     enc = s.encode('utf-8')
     return enc[:bytes].decode('utf-8', 'ignore')
-            
-            return Response({'chat_id': serializer.data['id'], "message": "successfully chat created"}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+def convert_to_ascii(s):
+    return re.sub(r'[^\x00-\x7F]+', '', s)
 # class CreateChat(APIView):
 #     def post(self, request):
 #         if not request.user.is_authenticated:
