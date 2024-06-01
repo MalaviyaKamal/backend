@@ -93,11 +93,16 @@ WSGI_APPLICATION = "full_auth.wsgi.application"
 
 if DEVELOPMENT_MODE is True:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'course',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',  
+        'PORT': '5432',      
     }
+}
+
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

@@ -21,7 +21,7 @@ def search_youtube(search_query):
 
 def get_transcript(video_id):
     try:
-        transcript_arr = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+        transcript_arr = YouTubeTranscriptApi.get_transcript(video_id, languages=['en','hi'])
         transcript = " ".join([t['text'] for t in transcript_arr])
         return transcript.replace("\n", "")
     except Exception as e:
