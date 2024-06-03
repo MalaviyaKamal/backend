@@ -14,7 +14,7 @@ from .views import  UploadPDF,ProcessPDF,GetAllPDFs
 urlpatterns = [
     path('upload/', UploadPDF.as_view(), name='upload_to_s3'),
 #     # path('createchat/',CreateChat.as_view(),name='create_chat'),
-    path('ask/<int:pdf_id>/', ProcessPDF.as_view(), name='ask-question'),
+    path('ask/<int:chatId>/', ProcessPDF.as_view(), name='ask-question'),
     path('chat/',GetAllPDFs.as_view(),name="pdf-name")
     
 ]

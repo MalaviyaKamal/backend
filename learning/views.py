@@ -7,6 +7,7 @@ from subscription.models import UserSubscription
 from .gpt import generate_chapters,model
 from django.shortcuts import get_object_or_404
 from .serializers import CourseSerializer,ChapterSerializer
+from rest_framework.permissions import BasePermission
 from rest_framework.generics import ListAPIView
 from django.db.models import Prefetch
 from django.core.exceptions import ObjectDoesNotExist
@@ -88,12 +89,18 @@ class CourseListAPIView(ListAPIView):
         except Exception as e:
             raise
     
+class IsCourseOwner(BasePermission):
+   
+    def has_object_permission(self, request, view, obj):
+        # Check if the requesting user is the owner of the course
+        return obj.user == request.user
     
 class CourseRetrieveAPIView(ListAPIView):
     serializer_class = CourseSerializer
-    
+    permission_classes = [IsCourseOwner]
     def list(self, request, *args, **kwargs):
         pk = self.kwargs.get('pk')
+        user = request.user 
         try:
             course = Course.objects.get(pk=pk)
             units = Unit.objects.filter(course=course).prefetch_related('chapter')
@@ -143,9 +150,9 @@ class ChapterInfoAPIView(APIView):
             questions = get_questions_from_transcript(transcript, chapter.name)
             print("question view file", questions)
             
-            chapter.videoId = video_id
-            chapter.summary = summary_text
-            chapter.save()
+            # chapter.videoId = video_id
+            # chapter.summary = summary_text
+            # chapter.save()
 
             if 'parts' in questions:
                 for question in questions['parts']:
@@ -159,7 +166,9 @@ class ChapterInfoAPIView(APIView):
                             options=options,
                             chapter=chapter
                         )
-            
+                chapter.videoId = video_id
+                chapter.summary = summary_text
+                chapter.save()
             return Response({"success": True, "videoId": video_id, "transcript": transcript, "summary": summary_text}, status=status.HTTP_200_OK)
         
         except Exception as e:

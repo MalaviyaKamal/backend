@@ -4,7 +4,7 @@ from .unsplash import get_unsplash_image
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
-genai.configure(api_key="AIzaSyD_BCQn7CjSfDqqwe-KUQeE5JWgXf0xTpM")
+genai.configure(api_key="AIzaSyD3fNrZOMYf3cvqcUDmEWfS0V-QgI_dlAs")
 model = genai.GenerativeModel('gemini-pro')
 
 def get_keywords_from_content(content):

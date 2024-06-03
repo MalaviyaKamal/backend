@@ -22,5 +22,5 @@ class Messages(models.Model):
     chat = models.ForeignKey(PDFDocument, on_delete=models.CASCADE)
     content = models.CharField(max_length=4000)
     created_at = models.DateTimeField(auto_now_add=True)
-    role = models.CharField(choices=[('system', 'System'), ('user', 'User')], max_length=20)
+    role = models.CharField(choices=[('system', 'system'), ('user', 'user')], max_length=20)
 

@@ -4,7 +4,7 @@ from .gpt import model
 from django.conf import settings
 from youtube_transcript_api import YouTubeTranscriptApi
 
-YOUTUBE_API_KEY='AIzaSyDXQs02952eLTbUBJdu2XAXbO3GqsJGVGI'
+YOUTUBE_API_KEY='AIzaSyAImPLncFYr2szuEr4YPwLZyKRVjMJIdwY'
 
 def search_youtube(search_query):
     search_query = requests.utils.quote(search_query)

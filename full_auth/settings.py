@@ -66,6 +66,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
+X_FRAME_OPTIONS = "ALLOWALL" # or 'ALLOW-FROM http://example.com' if you want to specify a specific domain
+
 ROOT_URLCONF = "full_auth.urls"
 
 TEMPLATES = [
