@@ -7,5 +7,4 @@ urlpatterns = [
     path('courseget/', CourseListAPIView.as_view(), name='getall course'),
     path('courseget/<int:pk>/', CourseRetrieveAPIView.as_view(), name='get_course'),
     path('chaptergetinfo/', ChapterInfoAPIView.as_view(), name='chapter info'),
-    
 ]

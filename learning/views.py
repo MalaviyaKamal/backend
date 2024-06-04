@@ -12,12 +12,14 @@ from rest_framework.generics import ListAPIView
 from django.db.models import Prefetch
 from django.core.exceptions import ObjectDoesNotExist
 from .youtube import search_youtube, get_transcript, get_questions_from_transcript
+from rest_framework import generics
 import traceback
 import json
 import random
 import ast
 from django.utils import timezone
 from datetime import timedelta
+from rest_framework.pagination import PageNumberPagination
 
 class CreateChapterAPIView(APIView):
     def post(self, request):
@@ -29,7 +31,6 @@ class CreateChapterAPIView(APIView):
             return Response({"error": "Title and units are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Check user's subscription status
             user = request.user
             user_subscription = UserSubscription.objects.filter(user=user).first()
             has_active_subscription = False
@@ -46,10 +47,8 @@ class CreateChapterAPIView(APIView):
             if not has_active_subscription and user.credits <= 0:
                 return Response({"error": "No credits remaining"}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
-            # Generate chapters
             response_data = generate_chapters(title, units, user_id)
 
-            # Decrement user's credits if no active subscription
             if not has_active_subscription:
                 user.credits -= 1
                 user.save()
@@ -59,40 +58,49 @@ class CreateChapterAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# class CourseListAPIView(ListAPIView):
+#     serializer_class = CourseSerializer
+#     def get_queryset(self):
+#         try:
+#             user = self.request.user
+#             all_course = Course.objects.filter(user=user).prefetch_related(
+#                 Prefetch('units', queryset=Unit.objects.all().prefetch_related('chapter'))
+#             )
+#             print(all_course.__dict__)
+#             return all_course
+#         except ObjectDoesNotExist:
+#             raise Http404("No Course matches the given query.")
+#         except Exception as e:
+#             raise Http404("An error occurred while fetching courses: {}".format(str(e)))
+        
 class CourseListAPIView(ListAPIView):
     serializer_class = CourseSerializer
-    
-    # def get_queryset(self):
-    #     all_course  = Course.objects.all().prefetch_related(
-    #         Prefetch('units', queryset=Unit.objects.all().prefetch_related('chapter'))
-    #     )
-    #     print(all_course.__dict__)
-    #     return all_course
-    
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     all_course  = Course.objects.filter(user=user).prefetch_related(
-    #     Prefetch('units', queryset=Unit.objects.all().prefetch_related('chapter'))
-    #     )
-    #     print(all_course.__dict__)
-    #     return all_course
     def get_queryset(self):
         try:
             user = self.request.user
-            all_course = Course.objects.filter(user=user).prefetch_related(
-                Prefetch('units', queryset=Unit.objects.all().prefetch_related('chapter'))
-            )
-            print(all_course.__dict__)
-            return all_course
+            query = self.request.query_params.get('search')
+
+            if query:
+               queryset = Course.objects.filter(user=user, name__icontains=query)
+            else:
+               queryset =  Course.objects.filter(user=user)
+               
+            return queryset
         except ObjectDoesNotExist:
             raise Http404("No Course matches the given query.")
         except Exception as e:
-            raise
+            raise Http404("An error occurred while fetching courses: {}".format(str(e)))
     
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response({'message': 'No search results found.'}, status=status.HTTP_404_NOT_FOUND)
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 class IsCourseOwner(BasePermission):
    
     def has_object_permission(self, request, view, obj):
-        # Check if the requesting user is the owner of the course
         return obj.user == request.user
     
 class CourseRetrieveAPIView(ListAPIView):

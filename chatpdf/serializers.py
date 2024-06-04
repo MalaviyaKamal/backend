@@ -14,4 +14,4 @@ class PDFDocumentSerializer(serializers.ModelSerializer):
 class MessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Messages
-        fields = ['chat', 'content', 'role']
+        fields = ['id','chat', 'content', 'role','created_at']
