@@ -14,6 +14,8 @@ from .serializers import UserAccountSerializer
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from .models import UserAccount
 
+
+    
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -113,7 +115,6 @@ class UserProfile(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self):
-        # Return the currently authenticated user
         return self.request.user
 
     def retrieve(self, request, *args, **kwargs):

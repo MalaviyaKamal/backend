@@ -64,10 +64,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
 ]
 
 
-X_FRAME_OPTIONS = "ALLOWALL" # or 'ALLOW-FROM http://example.com' if you want to specify a specific domain
+# X_FRAME_OPTIONS = "ALLOWALL" 
 
 ROOT_URLCONF = "full_auth.urls"
 
@@ -160,9 +161,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
 
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-]
+# AUTHENTICATION_BACKENDS = [
+#     "django.contrib.auth.backends.ModelBackend",
+#     'social_core.backends.google.GoogleOAuth2',
+# ]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -184,7 +186,7 @@ DJOSER = {
     "USER_CREATE_PASSWORD_RETYPE": True,
     "PASSWORD_RESET_CONFIRM_RETYPE": True,
     "TOKEN_MODEL": None,
-    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': getenv('REDIRECT_URLS').split(',')
+    # 'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': getenv('REDIRECT_URLS')
 
 }
 
@@ -195,20 +197,23 @@ AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_PATH = "/"
 AUTH_COOKIE_SAMESITE = "None"
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = getenv('GOOGLE_AUTH_KEY')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = getenv('GOOGLE_AUTH_SECRET_KEY')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
-    'openid'
-]
-SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ['first_name', 'last_name']
+# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = getenv('GOOGLE_AUTH_KEY')
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = getenv('GOOGLE_AUTH_SECRET_KEY')
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+#     'https://www.googleapis.com/auth/userinfo.email',
+#     'https://www.googleapis.com/auth/userinfo.profile',
+#     'openid'
+# ]
+# SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ['first_name', 'last_name']
 
 
 CORS_ALLOWED_ORIGINS = getenv(
     "CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
 ).split(",")
+CORS_ALLOW_HEADERS = ["Authorization", "Content-Type", "Accept"]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -229,11 +234,6 @@ STRIPE_PUBLIC_KEY = getenv("STRIPE_PUBLIC_KEY")
 NEXTAUTH_URL = getenv("NEXTAUTH_URL")
 STRIPE_WEBHOOK_SECRET = getenv("STRIPE_WEBHOOK_SECRET")
 
-
+#use stripe
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-
-AWS_ACCESS_KEY_ID = getenv('S3_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = getenv('S3_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = getenv('S3_BUCKET_NAME')
-AWS_S3_REGION_NAME = getenv('S3_REGION_NAME')

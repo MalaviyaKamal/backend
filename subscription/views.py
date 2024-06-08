@@ -105,10 +105,10 @@ class StripeWebhookView(APIView):
             elif event_type == 'invoice.payment_succeeded':
                 self.handle_invoice_payment_succeeded(session)
             else:
-                print(f"Unhandled event type: {event_type}")
+                # print(f"Unhandled event type: {event_type}")
                 return HttpResponseBadRequest(f"Unhandled event type: {event_type}")
         except Exception as e:
-            print(f"Error handling event: {e}")
+            # print(f"Error handling event: {e}")
             return HttpResponseBadRequest(f"Error handling event: {e}")
 
         return JsonResponse({'status': 'success'})
@@ -130,7 +130,7 @@ class StripeWebhookView(APIView):
                 stripe_current_period_end=datetime.fromtimestamp(subscription['current_period_end'])
             )
         except Exception as e:
-            print(f"Error in handle_checkout_session_completed: {e}")
+            # print(f"Error in handle_checkout_session_completed: {e}")
             raise
 
     def handle_invoice_payment_succeeded(self, session):
@@ -143,7 +143,7 @@ class StripeWebhookView(APIView):
                 stripe_current_period_end=datetime.fromtimestamp(subscription['current_period_end'])
             )
         except Exception as e:
-            print(f"Error in handle_invoice_payment_succeeded: {e}")
+            # print(f"Error in handle_invoice_payment_succeeded: {e}")
             raise
 
 class CheckSubscriptionView(APIView):
@@ -181,5 +181,5 @@ class CheckSubscriptionView(APIView):
             })
 
         except Exception as e:
-            print(f"Error checking subscription: {e}")
+            # print(f"Error checking subscription: {e}")
             return Response({"detail": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

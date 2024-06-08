@@ -4,6 +4,7 @@ from .unsplash import get_unsplash_image
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
+
 genai.configure(api_key="AIzaSyD3fNrZOMYf3cvqcUDmEWfS0V-QgI_dlAs")
 model = genai.GenerativeModel('gemini-pro')
 
@@ -19,13 +20,6 @@ def generate_chapters(title, units, user):
         return {"error": f"User with id '{user}' does not exist."}
 
     try:
-        # course_content = model.generate_content(f"A learning course about {title}")
-        # keywords = get_keywords_from_content(course_content.text)
-        # image_search_term = ' '.join(keywords)
-        # print("image search", image_search_term)
-        # course_image = get_unsplash_image(image_search_term)
-        # course = Course.objects.create(name=title, image=course_image, user=user_instance)
-        # course_id = course.id
         course_image = get_unsplash_image(title)
         if not course_image:
             return {"error": "No image found for the given title."}
@@ -52,8 +46,8 @@ def generate_chapters(title, units, user):
                 cleaned_title = cleaned_title.split(":")[-1].strip()
 
                 if not cleaned_title:
-                    continue  # Skip empty or invalid titles
-
+                    continue  
+                
                 youtube_search_param = cleaned_title.replace(" ", " ")
                 while f"Chapter {chapter_counter}: {cleaned_title}" in existing_titles:
                     chapter_counter += 1

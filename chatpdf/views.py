@@ -23,7 +23,7 @@ class UploadPDF(APIView):
         if request.FILES.get('file'):
             file = request.FILES['file']
             pdf_name = request.data.get('pdf_name', file.name)
-            print("pdf_name",pdf_name)
+            # print("pdf_name",pdf_name)
             user = request.user
 
             # Check user's subscription status
@@ -68,7 +68,7 @@ class GetAllPDFs(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
-print(os.environ["HUGGINGFACEHUB_API_TOKEN"])
+# print(os.environ["HUGGINGFACEHUB_API_TOKEN"])
 
 
 genai.configure(api_key="AIzaSyD3fNrZOMYf3cvqcUDmEWfS0V-QgI_dlAs")
@@ -120,11 +120,9 @@ class ProcessPDF(APIView):
                         chain = load_qa_chain(llm, chain_type="stuff")
                         answer = chain.run(input_documents=docs, question=question)
 
-                        # Check if the answer is inadequate
                         if "not enough information" in answer.lower():
                             raise ValueError("Inadequate response from the document")
                     else:
-                        # If no relevant documents are found, raise an exception
                         raise ValueError("No relevant documents found")
 
                     answer_serializer = MessagesSerializer(data={'chat': pdf_document.id, 'content': answer, 'role': 'system'})
@@ -137,8 +135,8 @@ class ProcessPDF(APIView):
                     if 'Inadequate response from the document' in str(e) or 'No relevant documents found' in str(e):
                         prompt = ( f"Please provide an answer to the following question: {question}")
                         gemini_response = model.generate_content(prompt)
-                        print("answer",gemini_response)
-                        print(gemini_response.candidates[0].content.parts[0].text)
+                        # print("answer",gemini_response)
+                        # print(gemini_response.candidates[0].content.parts[0].text)
                         gemini_text = gemini_response.candidates[0].content.parts[0].text
                         gemini_answer = clean_text(gemini_text)
 

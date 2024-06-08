@@ -58,21 +58,7 @@ class CreateChapterAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# class CourseListAPIView(ListAPIView):
-#     serializer_class = CourseSerializer
-#     def get_queryset(self):
-#         try:
-#             user = self.request.user
-#             all_course = Course.objects.filter(user=user).prefetch_related(
-#                 Prefetch('units', queryset=Unit.objects.all().prefetch_related('chapter'))
-#             )
-#             print(all_course.__dict__)
-#             return all_course
-#         except ObjectDoesNotExist:
-#             raise Http404("No Course matches the given query.")
-#         except Exception as e:
-#             raise Http404("An error occurred while fetching courses: {}".format(str(e)))
-        
+
 class CourseListAPIView(ListAPIView):
     serializer_class = CourseSerializer
     def get_queryset(self):
@@ -134,12 +120,12 @@ class ChapterInfoAPIView(APIView):
         try:
             print("chapter title", chapter.youtubeSearchQuery)
             video_id = search_youtube(chapter.youtubeSearchQuery)
-            print("video id", video_id)
+            # print("video id", video_id)
             if not video_id:
                 return Response({"success": False, "error": "Video not found"}, status=status.HTTP_404_NOT_FOUND)
             
             transcript = get_transcript(video_id)
-            print("transcript_view:", transcript)
+            # print("transcript_view:", transcript)
             
             if not transcript:
                 chapter.videoId = video_id
@@ -150,17 +136,17 @@ class ChapterInfoAPIView(APIView):
             summary = model.generate_content(
                 "You are an AI capable of summarising a YouTube transcript. Summarise in 250 words or less and do not talk of the sponsors or anything unrelated to the main topic. Also, do not introduce what the summary is about.\n" + transcript
             )
-            print("summary===========",summary)
+            # print("summary===========",summary)
             
             summary_text = summary._result.candidates[0].content.parts[0].text
-            print("summary_text", summary_text)
+            # print("summary_text", summary_text)
             
             questions = get_questions_from_transcript(transcript, chapter.name)
-            print("question view file", questions)
+            # print("question view file", questions)
             
-            # chapter.videoId = video_id
-            # chapter.summary = summary_text
-            # chapter.save()
+            chapter.videoId = video_id
+            chapter.summary = summary_text
+            chapter.save()
 
             if 'parts' in questions:
                 for question in questions['parts']:
@@ -174,9 +160,9 @@ class ChapterInfoAPIView(APIView):
                             options=options,
                             chapter=chapter
                         )
-                chapter.videoId = video_id
-                chapter.summary = summary_text
-                chapter.save()
+                # chapter.videoId = video_id
+                # chapter.summary = summary_text
+                # chapter.save()
             return Response({"success": True, "videoId": video_id, "transcript": transcript, "summary": summary_text}, status=status.HTTP_200_OK)
         
         except Exception as e:
@@ -185,100 +171,3 @@ class ChapterInfoAPIView(APIView):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class ChapterInfoAPIView(APIView):
-#     def post(self, request, *args, **kwargs):
-#         chapter_id = request.data.get('chapterId')
-#         if not chapter_id:
-#             return Response({"success": False, "error": "Invalid body"}, status=status.HTTP_400_BAD_REQUEST)
-        
-#         try:
-#             chapter = Chapter.objects.get(id=chapter_id)
-#         except Chapter.DoesNotExist:
-#             return Response({"success": False, "error": "Chapter not found"}, status=status.HTTP_404_NOT_FOUND)
-
-#         try:
-#             print("chapter title", chapter.youtubeSearchQuery)
-#             video_id = search_youtube(chapter.youtubeSearchQuery)
-#             print("video id", video_id)
-#             if not video_id:
-#                 return Response({"success": False, "error": "Video not found"}, status=status.HTTP_404_NOT_FOUND)
-            
-#             transcript = get_transcript(video_id)
-#             print("transcript_view:", transcript)
-            
-#             if not transcript:
-#                 chapter.videoId = video_id
-#                 chapter.save()
-                
-#                 return Response({"success": True, "videoId": video_id, "error": "Transcript not found"}, status=status.HTTP_200_OK)
-            
-#             summary = model.generate_content(
-#                 "You are an AI capable of summarising a youtube transcript. Summarise in 250 words or less and do not talk of the sponsors or anything unrelated to the main topic. Also, do not introduce what the summary is about.\n" + transcript
-#             )
-#             summary_text = summary._result.candidates[0].content.parts[0].text
-#             print("summary_text", summary_text)
-            
-#             questions = get_questions_from_transcript(transcript, chapter.name)
-#             print("question view file", questions)
-            
-#             if 'parts' in questions:
-#                 for question in questions['parts']:
-#                     if 'text' in question:
-#                         question_dict = ast.literal_eval(question['text'])
-#                         options = [question_dict['answer'], question_dict['option1'], question_dict['option2'], question_dict['option3']]
-#                         options.sort(key=lambda _: random.random())
-#                         chapter_instance = get_object_or_404(Chapter, id=chapter_id)
-#                         Question.objects.create(
-#                             question=question_dict['question'],
-#                             answer=question_dict['answer'],
-#                             options=options,
-#                             chapter=chapter_instance
-#                         )
-            
-#             chapter.videoId = video_id
-#             chapter.summary = summary_text
-#             chapter.save()
-
-#             return Response({"success": True, "videoId": video_id, "transcript": transcript, "summary": summary_text}, status=status.HTTP_200_OK)
-        
-#         except Exception as e:
-#             traceback.print_exc()
-#             return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
