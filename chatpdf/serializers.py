@@ -10,7 +10,7 @@ class PDFDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PDFDocument
         fields = ['id', 'file', 'pdf_name','uploaded_at', 'user']
-
+    
 class MessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Messages

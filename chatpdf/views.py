@@ -61,7 +61,7 @@ class GetAllPDFs(APIView):
     def get(self, request):
         try:
             user = request.user
-            pdf_documents = PDFDocument.objects.filter(user=user)
+            pdf_documents = PDFDocument.objects.filter(user=user).order_by('id')
             serializer = PDFDocumentSerializer(pdf_documents, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:

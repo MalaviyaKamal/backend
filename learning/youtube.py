@@ -52,5 +52,5 @@ def get_questions_from_transcript(transcript, course_title, num_questions=3):
             mcq = "I am sorry, but I couldn't generate a question at this time."
             questions.append({'text': mcq})
 
-    print("questions:", questions)
+    # print("questions:", questions)
     return {'parts': questions}

@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     "users",
     "learning",
     "subscription",
-    "chatpdf"
+    "chatpdf",
+    'csp',
     
 ]
 
@@ -64,11 +65,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "csp.middleware.CSPMiddleware"
     
 ]
 
-
-# X_FRAME_OPTIONS = "ALLOWALL" 
+CSP_FRAME_ANCESTORS = ["'self'", 'http://127.0.0.1:3000','http://localhost:3000']
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 ROOT_URLCONF = "full_auth.urls"
 

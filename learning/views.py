@@ -118,7 +118,7 @@ class ChapterInfoAPIView(APIView):
             return Response({"success": False, "error": "Chapter not found"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            print("chapter title", chapter.youtubeSearchQuery)
+            # print("chapter title", chapter.youtubeSearchQuery)
             video_id = search_youtube(chapter.youtubeSearchQuery)
             # print("video id", video_id)
             if not video_id:
