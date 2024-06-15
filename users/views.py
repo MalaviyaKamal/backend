@@ -15,7 +15,6 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from .models import UserAccount
 
 
-    
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -85,8 +84,6 @@ class CustomTokenVerifyView(TokenVerifyView):
 class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
         response = Response(status=status.HTTP_204_NO_CONTENT)
-        # response.delete_cookie("access")
-        # response.delete_cookie("refresh")
         past_date = datetime.utcnow() - timedelta(days=10)
         response.set_cookie(
             "access",
